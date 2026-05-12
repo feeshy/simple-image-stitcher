@@ -14,10 +14,12 @@
 
     body {
       font-family: 'Inter', sans-serif;
-      background-color: #121212;
-      color: #ffffff;
       overflow: hidden;
       overscroll-behavior: none;
+      width: 100vw;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
     }
 
     #main-canvas {
@@ -58,9 +60,15 @@
       height: 160px;
       border-radius: 0.5rem;
       overflow: hidden;
-      background: #2a2a2a;
+      background: #f3f4f6;
       cursor: grab;
       transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .thumbnail-container {
+        background: #2a2a2a;
+      }
     }
 
     .thumbnail-container:active {
@@ -106,15 +114,25 @@
       bottom: 2rem;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(30, 30, 30, 0.85);
+      background: rgba(255, 255, 255, 0.9);
       backdrop-filter: blur(12px);
       padding: 0.75rem 1.5rem;
       border-radius: 999px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
       display: flex;
       gap: 1rem;
       align-items: center;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      color: #1f2937;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .floating-panel {
+        background: rgba(30, 30, 30, 0.85);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+      }
     }
 
     .btn {
@@ -138,18 +156,35 @@
     }
 
     .btn-primary:disabled {
-      background: #374151;
+      background: #d1d5db;
       color: #9ca3af;
       cursor: not-allowed;
     }
 
+    @media (prefers-color-scheme: dark) {
+      .btn-primary:disabled {
+        background: #374151;
+      }
+    }
+
     .btn-secondary {
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
+      background: rgba(0, 0, 0, 0.05);
+      color: inherit;
     }
 
     .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+      }
+
+      .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
     }
 
     .toast {
@@ -157,8 +192,8 @@
       top: 2rem;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.8);
-      color: white;
+      background: rgba(255, 255, 255, 0.95);
+      color: #1f2937;
       padding: 0.75rem 1.5rem;
       border-radius: 0.5rem;
       font-size: 0.875rem;
@@ -166,68 +201,87 @@
       opacity: 0;
       transition: opacity 0.3s;
       pointer-events: none;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .toast {
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        border: none;
+      }
     }
   </style>
 </head>
 
-<body>
-  <div id="step-1" class="step-container active-step p-6 max-w-5xl mx-auto items-center justify-center">
-    <div class="text-center mb-8">
-      <h1 class="text-3xl font-bold mb-2">简单拼图</h1>
-      <p class="text-gray-400">添加至少两张图片，拖拽可重新排序</p>
+<body class="bg-gray-50 text-gray-900 dark:bg-[#121212] dark:text-white">
+  <div id="step-1" class="step-container active-step p-4 sm:p-6 w-full h-full flex flex-col">
+    <div class="text-center mb-4 sm:mb-6 shrink-0">
+      <h1 class="text-2xl sm:text-3xl font-bold mb-2">简单拼图</h1>
+      <p class="text-gray-500 dark:text-gray-400">添加多图，拖拽排序</p>
     </div>
 
-    <div class="flex gap-4 mb-8 bg-gray-800/50 p-2 rounded-full border border-gray-700">
-      <label class="flex items-center gap-2 cursor-pointer px-4 py-2 rounded-full transition-colors hover:bg-gray-700">
+    <div
+      class="flex gap-4 mb-4 sm:mb-6 bg-white dark:bg-gray-800/50 p-2 rounded-full border border-gray-200 dark:border-gray-700 shrink-0 self-center">
+      <label
+        class="flex items-center gap-2 cursor-pointer px-4 py-2 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-700">
         <input type="radio" name="direction" value="vertical" checked class="accent-blue-500">
         <span class="text-sm font-medium">纵向拼接</span>
       </label>
-      <label class="flex items-center gap-2 cursor-pointer px-4 py-2 rounded-full transition-colors hover:bg-gray-700">
+      <label
+        class="flex items-center gap-2 cursor-pointer px-4 py-2 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-700">
         <input type="radio" name="direction" value="horizontal" class="accent-blue-500">
         <span class="text-sm font-medium">横向拼接</span>
       </label>
     </div>
 
     <div
-      class="w-full bg-gray-900 border-2 border-dashed border-gray-700 rounded-2xl p-6 min-h-[300px] flex flex-col items-center justify-center relative transition-colors"
+      class="w-full flex-grow bg-white dark:bg-gray-900 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-2xl flex flex-col relative transition-colors min-h-0 overflow-hidden cursor-pointer"
       id="drop-zone">
-      <div id="image-grid" class="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 hidden">
+      <input type="file" id="file-input" multiple accept="image/*" class="hidden">
+
+      <div id="image-grid"
+        class="w-full h-full overflow-y-auto p-4 sm:p-6 content-start grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-4 hidden relative z-10">
       </div>
-      <div id="empty-state" class="text-center pointer-events-none">
-        <svg class="w-16 h-16 mx-auto text-gray-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+      <div id="empty-state" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0">
+        <svg class="w-16 h-16 text-gray-400 dark:text-gray-600 mb-4" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
-        <p class="text-gray-400 text-sm">点击或拖拽图片到此处</p>
+        <p class="text-gray-500 dark:text-gray-400 text-sm">点击或拖拽图片到此处</p>
       </div>
-      <input type="file" id="file-input" multiple accept="image/*"
-        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
     </div>
-    <div class="mt-8">
+
+    <div class="mt-4 sm:mt-6 shrink-0 flex justify-center gap-4">
+      <button id="btn-clear-all" class="btn btn-secondary px-8 py-3 text-lg opacity-50 cursor-not-allowed"
+        disabled>清空</button>
       <button id="btn-next-1" class="btn btn-primary px-8 py-3 text-lg opacity-50 cursor-not-allowed"
         disabled>下一步</button>
     </div>
   </div>
 
-  <div id="step-2-3" class="step-container hidden-step bg-gray-950">
+  <div id="step-2-3" class="step-container hidden-step bg-gray-100 dark:bg-gray-950">
     <canvas id="main-canvas" class="w-full h-full block"></canvas>
 
     <div id="ui-step2-global" class="floating-panel hidden">
       <button class="btn btn-secondary" id="btn-global-prev">上一步</button>
-      <span class="text-sm text-gray-300 mx-2 hidden sm:inline">点击发光的接缝进入微调</span>
+      <span class="text-xs sm:text-sm text-gray-500 dark:text-gray-300 mx-1 sm:mx-2 whitespace-nowrap">点击接缝微调</span>
       <button class="btn btn-primary" id="btn-global-next">下一步</button>
     </div>
 
     <div id="ui-step2-seam" class="floating-panel hidden">
       <button class="btn btn-secondary" id="btn-seam-cancel">取消</button>
-      <span class="text-sm text-gray-300 mx-2 hidden sm:inline">拖拽图片对齐细节</span>
+      <span class="text-xs sm:text-sm text-gray-500 dark:text-gray-300 mx-1 sm:mx-2 whitespace-nowrap">拖拽对齐</span>
       <button class="btn btn-primary" id="btn-seam-confirm">完成</button>
     </div>
 
     <div id="ui-step3-crop" class="floating-panel hidden">
       <button class="btn btn-secondary" id="btn-crop-prev">上一步</button>
-      <button class="btn btn-secondary" id="btn-crop-restart">重新开始</button>
-      <button class="btn btn-primary flex items-center gap-2" id="btn-crop-save">
+      <button class="btn btn-secondary hidden sm:block" id="btn-crop-restart">重新开始</button>
+      <button class="btn btn-primary flex items-center gap-1 sm:gap-2" id="btn-crop-save">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -254,7 +308,7 @@
           start_url: mainUrl, display: "standalone",
           background_color: "#121212", theme_color: "#121212",
           icons: [{
-            src: "data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%231f2937' rx='112'/%3E%3Cpath fill='%233b82f6' d='M150 150h212v212H150z'/%3E%3Cpath fill='%2310b981' d='M200 200h112v112H200z'/%3E%3C/svg%3E",
+            src: "data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%23ffffff' rx='112'/%3E%3Crect x='128' y='128' width='256' height='256' fill='none' stroke='%23000000' stroke-width='32'/%3E%3Cpath d='M64 256h384' stroke='%23000000' stroke-width='32' stroke-linecap='round'/%3E%3C/svg%3E",
             sizes: "512x512", type: "image/svg+xml", purpose: "any maskable"
           }]
         };
@@ -359,6 +413,7 @@
         this.grid = document.getElementById('image-grid');
         this.emptyState = document.getElementById('empty-state');
         this.btnNext = document.getElementById('btn-next-1');
+        this.btnClear = document.getElementById('btn-clear-all');
       }
 
       handleFiles(files) {
@@ -404,10 +459,11 @@
           const div = document.createElement('div');
           div.className = 'thumbnail-container';
           div.draggable = true;
+          div.dataset.index = index;
 
           div.innerHTML = `
                         <img src="${imgObj.url}" class="thumbnail-img">
-                        <div class="delete-btn" data-index="${index}">
+                        <div class="delete-btn" title="删除">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                         </div>
                     `;
@@ -415,23 +471,33 @@
           div.querySelector('.delete-btn').onclick = (e) => { e.stopPropagation(); this.removeImage(index); };
 
           div.addEventListener('dragstart', e => {
-            e.dataTransfer.setData('text/plain', index);
+            e.dataTransfer.setData('text/plain', div.dataset.index);
             setTimeout(() => div.style.opacity = '0.5', 0);
           });
           div.addEventListener('dragend', () => div.style.opacity = '1');
           div.addEventListener('dragover', e => { e.preventDefault(); div.classList.add('drag-over'); });
           div.addEventListener('dragleave', () => div.classList.remove('drag-over'));
           div.addEventListener('drop', e => {
-            e.preventDefault(); div.classList.remove('drag-over');
+            e.preventDefault();
+            e.stopPropagation();
+            div.classList.remove('drag-over');
+
             const dragIndex = parseInt(e.dataTransfer.getData('text/plain'));
-            if (dragIndex !== index && !isNaN(dragIndex)) {
+            const targetIndex = parseInt(div.dataset.index);
+
+            if (dragIndex !== targetIndex && !isNaN(dragIndex) && !isNaN(targetIndex)) {
               const [draggedImg] = images.splice(dragIndex, 1);
-              images.splice(index, 0, draggedImg);
+              images.splice(targetIndex, 0, draggedImg);
               this.renderThumbnails();
             }
           });
           this.grid.appendChild(div);
         });
+
+        const hasImages = images.length > 0;
+        this.btnClear.disabled = !hasImages;
+        this.btnClear.classList.toggle('opacity-50', !hasImages);
+        this.btnClear.classList.toggle('cursor-not-allowed', !hasImages);
 
         const canProceed = images.length >= 2;
         this.btnNext.disabled = !canProceed;
@@ -455,10 +521,14 @@
 
       drawGrid(w, h) {
         const ctx = this.ctx;
-        ctx.fillStyle = '#1e1e1e';
+        const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        ctx.fillStyle = isDark ? '#1e1e1e' : '#e5e7eb';
         ctx.fillRect(0, 0, w, h);
+
         const s = 40;
-        ctx.strokeStyle = 'rgba(255,255,255,0.03)'; ctx.lineWidth = 1;
+        ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.04)';
+        ctx.lineWidth = 1;
         ctx.beginPath();
         for (let x = (w / 2) % s; x < w; x += s) { ctx.moveTo(x, 0); ctx.lineTo(x, h); }
         for (let y = (h / 2) % s; y < h; y += s) { ctx.moveTo(0, y); ctx.lineTo(w, y); }
@@ -541,8 +611,8 @@
         }
         ctx.globalAlpha = 1.0;
 
-        ctx.strokeStyle = '#00ff00'; ctx.setLineDash([5 / state.camera.zoom, 5 / state.camera.zoom]);
-        ctx.lineWidth = 1 / state.camera.zoom; ctx.beginPath();
+        ctx.strokeStyle = '#10b981'; ctx.setLineDash([5 / state.camera.zoom, 5 / state.camera.zoom]);
+        ctx.lineWidth = 1.5 / state.camera.zoom; ctx.beginPath();
         if (state.direction === 'vertical') {
           const cy = img1.logicalY + img1.logicalH - state.overlaps[idx] / 2;
           ctx.moveTo(-1000, cy); ctx.lineTo(state.baseDimension + 1000, cy);
@@ -563,7 +633,7 @@
         ctx.rect(x + w, y, -w, h); ctx.fill('evenodd');
 
         ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2 / state.camera.zoom; ctx.strokeRect(x, y, w, h);
-        ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1 / state.camera.zoom; ctx.beginPath();
+        ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 1 / state.camera.zoom; ctx.beginPath();
         ctx.moveTo(x + w / 3, y); ctx.lineTo(x + w / 3, y + h);
         ctx.moveTo(x + 2 * w / 3, y); ctx.lineTo(x + 2 * w / 3, y + h);
         ctx.moveTo(x, y + h / 3); ctx.lineTo(x + w, y + h / 3);
@@ -799,8 +869,8 @@
 
       setUIMode(mode) {
         this.state.mode = mode;
-        document.getElementById('step-1').className = mode === UI_MODE.STEP1 ? 'step-container active-step p-6 max-w-5xl mx-auto items-center justify-center' : 'step-container hidden-step';
-        document.getElementById('step-2-3').className = mode !== UI_MODE.STEP1 ? 'step-container active-step bg-gray-950' : 'step-container hidden-step';
+        document.getElementById('step-1').className = mode === UI_MODE.STEP1 ? 'step-container active-step p-4 sm:p-6 w-full h-full flex flex-col' : 'step-container hidden-step';
+        document.getElementById('step-2-3').className = mode !== UI_MODE.STEP1 ? 'step-container active-step bg-gray-100 dark:bg-gray-950' : 'step-container hidden-step';
 
         document.getElementById('ui-step2-global').classList.toggle('hidden', mode !== UI_MODE.STEP2_GLOBAL);
         document.getElementById('ui-step2-seam').classList.toggle('hidden', mode !== UI_MODE.STEP2_SEAM);
@@ -847,8 +917,19 @@
         dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('border-blue-500'); });
         dropZone.addEventListener('dragleave', e => { e.preventDefault(); dropZone.classList.remove('border-blue-500'); });
         dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('border-blue-500'); this.imageHandler.handleFiles(e.dataTransfer.files); });
-        dropZone.addEventListener('click', e => { if (e.target === dropZone || e.target.closest('#empty-state')) fileInput.click(); });
+        dropZone.addEventListener('click', e => {
+          if (!e.target.closest('.thumbnail-container')) {
+            fileInput.click();
+          }
+        });
         fileInput.addEventListener('change', e => this.imageHandler.handleFiles(e.target.files));
+
+        document.getElementById('btn-clear-all').onclick = () => {
+          this.state.images.forEach(img => URL.revokeObjectURL(img.url));
+          this.state.images = [];
+          this.imageHandler.renderThumbnails();
+          fileInput.value = '';
+        };
 
         document.getElementById('btn-next-1').onclick = () => {
           this.state.direction = Array.from(document.getElementsByName('direction')).find(r => r.checked).value;
@@ -893,6 +974,10 @@
 
           exportCanvas.width = outW; exportCanvas.height = outH;
           const eCtx = exportCanvas.getContext('2d');
+
+          eCtx.imageSmoothingEnabled = true;
+          eCtx.imageSmoothingQuality = 'high';
+
           eCtx.scale(scale, scale); eCtx.translate(-this.state.cropBox.x, -this.state.cropBox.y);
 
           this.render.renderClippedImages(eCtx, this.state.cropBox);
@@ -912,7 +997,6 @@
       }
     }
 
-    // Bootstrap the application
     const app = new AppController();
   </script>
 </body>
