@@ -7,7 +7,8 @@
   <meta name="theme-color" content="#121212">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>简单拼图</title>
+  <title data-i18n="title">简单拼图</title>
+  <meta name="keywords" content="长图拼接,台词拼接,拼图工具,图片拼接,长图生成,离线应用,PWA,Image Stitcher,Long Image,Photo Joiner">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
@@ -218,7 +219,7 @@
 <body class="bg-gray-50 text-gray-900 dark:bg-[#121212] dark:text-white">
   <div id="step-1" class="step-container active-step p-4 sm:p-6 w-full h-full flex flex-col">
     <div class="text-center mb-4 sm:mb-6 shrink-0">
-      <h1 class="text-2xl sm:text-3xl font-bold mb-2">简单拼图</h1>
+      <h1 class="text-2xl sm:text-3xl font-bold mb-2" data-i18n="title">简单拼图</h1>
     </div>
 
     <div
@@ -226,12 +227,12 @@
       <label
         class="flex items-center gap-2 cursor-pointer px-4 py-2 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-700">
         <input type="radio" name="direction" value="vertical" checked class="accent-blue-500">
-        <span class="text-sm font-medium">纵向拼接</span>
+        <span class="text-sm font-medium" data-i18n="vertical">纵向拼接</span>
       </label>
       <label
         class="flex items-center gap-2 cursor-pointer px-4 py-2 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-700">
         <input type="radio" name="direction" value="horizontal" class="accent-blue-500">
-        <span class="text-sm font-medium">横向拼接</span>
+        <span class="text-sm font-medium" data-i18n="horizontal">横向拼接</span>
       </label>
     </div>
 
@@ -250,15 +251,16 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
-        <p class="text-gray-500 dark:text-gray-400 text-sm">点击或拖拽图片到此处<br>拖动缩略图可重新排序</p>
+        <p class="text-gray-500 dark:text-gray-400 text-sm text-center"><span
+            data-i18n="emptyTitle">点击或拖拽图片到此处</span><br><span data-i18n="emptySub">拖动缩略图可重新排序</span></p>
       </div>
     </div>
 
     <div class="mt-4 sm:mt-6 shrink-0 flex justify-center gap-4">
-      <button id="btn-clear-all" class="btn btn-secondary px-8 py-3 text-lg opacity-50 cursor-not-allowed"
-        disabled>清空</button>
-      <button id="btn-next-1" class="btn btn-primary px-8 py-3 text-lg opacity-50 cursor-not-allowed"
-        disabled>下一步</button>
+      <button id="btn-clear-all" class="btn btn-secondary px-8 py-3 text-lg opacity-50 cursor-not-allowed" disabled
+        data-i18n="clear">清空</button>
+      <button id="btn-next-1" class="btn btn-primary px-8 py-3 text-lg opacity-50 cursor-not-allowed" disabled
+        data-i18n="nextStep">下一步</button>
     </div>
   </div>
 
@@ -266,13 +268,14 @@
     <canvas id="main-canvas" class="w-full h-full block"></canvas>
 
     <div id="ui-step2-global" class="floating-panel hidden">
-      <button class="btn btn-secondary" id="btn-global-prev">上一步</button>
-      <span class="text-xs sm:text-sm text-gray-500 dark:text-gray-300 mx-1 sm:mx-2 whitespace-nowrap">点击接缝微调</span>
-      <button class="btn btn-primary" id="btn-global-next">下一步</button>
+      <button class="btn btn-secondary" id="btn-global-prev" data-i18n="prevStep">上一步</button>
+      <span class="text-xs sm:text-sm text-gray-500 dark:text-gray-300 mx-1 sm:mx-2 whitespace-nowrap"
+        data-i18n="clickSeam">点击接缝微调</span>
+      <button class="btn btn-primary" id="btn-global-next" data-i18n="nextStep">下一步</button>
     </div>
 
     <div id="ui-step2-seam" class="floating-panel hidden">
-      <button class="btn btn-secondary" id="btn-seam-cancel">取消</button>
+      <button class="btn btn-secondary" id="btn-seam-cancel" data-i18n="cancel">取消</button>
       <label class="flex items-center gap-2 cursor-pointer mx-1 sm:mx-2 group">
         <div class="relative flex items-center">
           <input type="checkbox" id="seam-mode-toggle" class="sr-only peer">
@@ -284,38 +287,81 @@
         </div>
         <span
           class="text-xs sm:text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap select-none transition-colors group-hover:text-gray-900 dark:group-hover:text-white"
-          id="seam-mode-text">独立裁切</span>
+          id="seam-mode-text" data-i18n="indepCrop">独立裁切</span>
       </label>
-      <button class="btn btn-primary" id="btn-seam-confirm">完成</button>
+      <button class="btn btn-primary" id="btn-seam-confirm" data-i18n="done">完成</button>
     </div>
 
     <div id="ui-step3-crop" class="floating-panel hidden">
-      <button class="btn btn-secondary" id="btn-crop-prev">上一步</button>
+      <button class="btn btn-secondary" id="btn-crop-prev" data-i18n="prevStep">上一步</button>
+      <button class="btn btn-secondary" id="btn-crop-reset" data-i18n="resetCrop">重置</button>
       <button class="btn btn-primary flex items-center gap-1 sm:gap-2" id="btn-crop-save">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
         </svg>
-        保存图片
+        <span data-i18n="saveImage">保存图片</span>
       </button>
-      <button class="btn btn-secondary hidden sm:block" id="btn-crop-restart">重新开始</button>
+      <button class="btn btn-secondary hidden sm:block" id="btn-crop-restart" data-i18n="restart">重新开始</button>
     </div>
   </div>
 
   <div id="toast" class="toast">提示信息</div>
 
   <script>
+    const I18N_DATA = {
+      zh: {
+        title: "简单拼图", vertical: "纵向拼接", horizontal: "横向拼接",
+        emptyTitle: "点击或拖拽添加图片", emptySub: "拖动缩略图重新排序",
+        clear: "清空", nextStep: "下一步", prevStep: "上一步",
+        clickSeam: "点击接缝微调", cancel: "取消",
+        indepCrop: "独立裁切", symCrop: "对称裁切", done: "完成",
+        resetCrop: "重置", saveImage: "保存图片", restart: "重新开始",
+        offline: "您已离线，应用可在离线模式下继续使用", online: "网络已恢复",
+        generating: "正在生成...", tooLarge: "图片过大，已自动缩放以防崩溃",
+        downloaded: "下载完成", delete: "删除",
+        desc: "极简纯前端长图拼接应用，支持离线本地使用"
+      },
+      en: {
+        title: "Simple Image Stitcher", vertical: "Vertical", horizontal: "Horizontal",
+        emptyTitle: "Click or drag images here", emptySub: "Drag thumbnails to reorder",
+        clear: "Clear", nextStep: "Next", prevStep: "Prev",
+        clickSeam: "Adjust the seam", cancel: "Cancel",
+        indepCrop: "Inde", symCrop: "Symm", done: "Done",
+        resetCrop: "Reset", saveImage: "Save", restart: "Restart",
+        offline: "You are offline. App continues to work.", online: "Network restored",
+        generating: "Generating...", tooLarge: "Image too large, auto-scaled to prevent crash.",
+        downloaded: "Downloaded", delete: "Delete",
+        desc: "Simple front-end long image stitcher, PWA offline ready."
+      }
+    };
+
+    class I18nModule {
+      constructor() {
+        this.lang = navigator.language.startsWith('zh') ? 'zh' : 'en';
+        this.updateDOM();
+      }
+      t(key) { return I18N_DATA[this.lang][key] || key; }
+      updateDOM() {
+        document.title = this.t('title');
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+          el.textContent = this.t(el.getAttribute('data-i18n'));
+        });
+      }
+    }
+
     const UI_MODE = { STEP1: 'step1', STEP2_GLOBAL: 'step2_global', STEP2_SEAM: 'step2_seam', STEP3_CROP: 'step3_crop' };
 
     class PWAModule {
-      constructor() {
+      constructor(app) {
+        this.app = app;
         this.init();
       }
       init() {
         const mainUrl = location.href.split('?')[0].split('#')[0];
         const manifest = {
-          name: "简单拼图", short_name: "简单拼图",
-          description: "极简纯前端长图拼接应用，支持离线本地使用",
+          name: this.app.i18n.t('title'), short_name: this.app.i18n.t('title'),
+          description: this.app.i18n.t('desc'),
           start_url: mainUrl, display: "standalone",
           background_color: "#121212", theme_color: "#121212",
           icons: [{
@@ -476,7 +522,7 @@
 
           div.innerHTML = `
                         <img src="${imgObj.url}" class="thumbnail-img">
-                        <div class="delete-btn" title="删除">
+                        <div class="delete-btn" title="${this.app.i18n.t('delete')}">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                         </div>
                     `;
@@ -909,8 +955,9 @@
 
     class AppController {
       constructor() {
+        this.i18n = new I18nModule();
         this.state = new StateModule();
-        this.pwa = new PWAModule();
+        this.pwa = new PWAModule(this);
         this.imageHandler = new ImageModule(this);
         this.render = new RenderModule(this);
         this.gesture = new GestureModule(this);
@@ -920,8 +967,8 @@
         requestAnimationFrame(this.loop);
 
         window.addEventListener('resize', () => { this.render.resize(); this.fitCamera(); });
-        window.addEventListener('offline', () => this.showToast("您已离线，应用可在离线模式下继续使用"));
-        window.addEventListener('online', () => this.showToast("网络已恢复"));
+        window.addEventListener('offline', () => this.showToast(this.i18n.t("offline")));
+        window.addEventListener('online', () => this.showToast(this.i18n.t("online")));
       }
 
       showToast(msg) {
@@ -1010,7 +1057,7 @@
         if (seamModeToggle) {
           seamModeToggle.addEventListener('change', (e) => {
             this.state.seamMode = e.target.checked ? 'symmetric' : 'independent';
-            seamModeText.textContent = e.target.checked ? '对称裁切' : '独立裁切';
+            seamModeText.textContent = e.target.checked ? this.i18n.t('symCrop') : this.i18n.t('indepCrop');
           });
         }
 
@@ -1035,9 +1082,9 @@
         };
 
         document.getElementById('btn-crop-prev').onclick = () => { this.state.updateLayoutPositions(); this.fitCamera(); this.setUIMode(UI_MODE.STEP2_GLOBAL); };
-        document.getElementById('btn-crop-restart').onclick = () => this.setUIMode(UI_MODE.STEP1);
+        document.getElementById('btn-crop-reset').onclick = () => { this.state.cropBox = { x: 0, y: 0, w: this.state.totalBounds.w, h: this.state.totalBounds.h }; this.fitCamera(); };
         document.getElementById('btn-crop-save').onclick = async () => {
-          this.showToast("正在生成图片...");
+          this.showToast(this.i18n.t("generating"));
           await new Promise(r => setTimeout(r, 50));
 
           const exportCanvas = document.createElement('canvas');
@@ -1047,7 +1094,7 @@
           if (outW > maxDim || outH > maxDim) {
             scale = maxDim / Math.max(outW, outH);
             outW *= scale; outH *= scale;
-            this.showToast("图片过大，已自动缩放以防崩溃");
+            this.showToast(this.i18n.t("tooLarge"));
           }
 
           exportCanvas.width = outW; exportCanvas.height = outH;
@@ -1064,9 +1111,10 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url; a.download = `stitched_image_${Date.now()}.png`; a.click();
-            URL.revokeObjectURL(url); this.showToast("下载完成");
+            URL.revokeObjectURL(url); this.showToast(this.i18n.t("downloaded"));
           }, 'image/png', 1.0);
         };
+        document.getElementById('btn-crop-restart').onclick = () => this.setUIMode(UI_MODE.STEP1);
       }
 
       loop() {
