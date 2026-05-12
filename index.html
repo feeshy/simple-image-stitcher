@@ -219,7 +219,6 @@
   <div id="step-1" class="step-container active-step p-4 sm:p-6 w-full h-full flex flex-col">
     <div class="text-center mb-4 sm:mb-6 shrink-0">
       <h1 class="text-2xl sm:text-3xl font-bold mb-2">简单拼图</h1>
-      <p class="text-gray-500 dark:text-gray-400">添加多图，拖拽排序</p>
     </div>
 
     <div
@@ -251,7 +250,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
-        <p class="text-gray-500 dark:text-gray-400 text-sm">点击或拖拽图片到此处</p>
+        <p class="text-gray-500 dark:text-gray-400 text-sm">点击或拖拽图片到此处<br>拖动缩略图可重新排序</p>
       </div>
     </div>
 
@@ -274,13 +273,24 @@
 
     <div id="ui-step2-seam" class="floating-panel hidden">
       <button class="btn btn-secondary" id="btn-seam-cancel">取消</button>
-      <span class="text-xs sm:text-sm text-gray-500 dark:text-gray-300 mx-1 sm:mx-2 whitespace-nowrap">拖拽对齐</span>
+      <label class="flex items-center gap-2 cursor-pointer mx-1 sm:mx-2 group">
+        <div class="relative flex items-center">
+          <input type="checkbox" id="seam-mode-toggle" class="sr-only peer">
+          <div class="w-10 h-5 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-blue-500 transition-colors">
+          </div>
+          <div
+            class="absolute left-0.5 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-5 shadow-sm">
+          </div>
+        </div>
+        <span
+          class="text-xs sm:text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap select-none transition-colors group-hover:text-gray-900 dark:group-hover:text-white"
+          id="seam-mode-text">独立裁切</span>
+      </label>
       <button class="btn btn-primary" id="btn-seam-confirm">完成</button>
     </div>
 
     <div id="ui-step3-crop" class="floating-panel hidden">
       <button class="btn btn-secondary" id="btn-crop-prev">上一步</button>
-      <button class="btn btn-secondary hidden sm:block" id="btn-crop-restart">重新开始</button>
       <button class="btn btn-primary flex items-center gap-1 sm:gap-2" id="btn-crop-save">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -288,6 +298,7 @@
         </svg>
         保存图片
       </button>
+      <button class="btn btn-secondary hidden sm:block" id="btn-crop-restart">重新开始</button>
     </div>
   </div>
 
@@ -363,7 +374,9 @@
         this.baseDimension = 0;
         this.totalBounds = { w: 0, h: 0 };
         this.activeSeamIndex = -1;
-        this.tempOverlapDelta = 0;
+        this.tempOverlapDeltaPrev = 0;
+        this.tempOverlapDeltaNext = 0;
+        this.seamMode = 'independent';
         this.cropBox = { x: 0, y: 0, w: 0, h: 0 };
       }
 
@@ -398,7 +411,7 @@
             img.logicalY = 0; img.logicalX = currentPos;
             currentPos += img.logicalW;
           }
-          if (i < this.overlaps.length) currentPos -= this.overlaps[i];
+          if (i < this.overlaps.length) currentPos -= (this.overlaps[i].prev + this.overlaps[i].next);
         }
         this.totalBounds = {
           w: this.direction === 'vertical' ? maxCross : currentPos,
@@ -538,8 +551,8 @@
       renderClippedImages(ctxToDraw, customCropBox = null) {
         const state = this.app.state;
         state.images.forEach((img, i) => {
-          let cropStart = i > 0 ? Math.max(0, state.overlaps[i - 1] / 2) : 0;
-          let cropEnd = i < state.images.length - 1 ? Math.max(0, state.overlaps[i] / 2) : 0;
+          let cropStart = i > 0 ? Math.max(0, state.overlaps[i - 1].next) : 0;
+          let cropEnd = i < state.images.length - 1 ? Math.max(0, state.overlaps[i].prev) : 0;
 
           let sx = 0, sy = 0, sw = img.naturalW, sh = img.naturalH;
           let dx = img.logicalX, dy = img.logicalY, dw = img.logicalW, dh = img.logicalH;
@@ -574,10 +587,10 @@
           const img = state.images[i];
           ctx.beginPath();
           if (state.direction === 'vertical') {
-            const y = img.logicalY + img.logicalH - overlap / 2;
+            const y = img.logicalY + img.logicalH - overlap.prev;
             ctx.moveTo(0, y); ctx.lineTo(state.baseDimension, y);
           } else {
-            const x = img.logicalX + img.logicalW - overlap / 2;
+            const x = img.logicalX + img.logicalW - overlap.prev;
             ctx.moveTo(x, 0); ctx.lineTo(x, state.baseDimension);
           }
           ctx.stroke();
@@ -591,34 +604,69 @@
         const idx = state.activeSeamIndex;
         const img1 = state.images[idx];
         const img2 = state.images[idx + 1];
-        const delta = state.tempOverlapDelta;
+        const deltaPrev = state.tempOverlapDeltaPrev;
+        const deltaNext = state.tempOverlapDeltaNext;
         const ds = this.app.gesture.dragState;
 
         let x1 = img1.logicalX, y1 = img1.logicalY;
         let x2 = img2.logicalX, y2 = img2.logicalY;
 
-        if (state.direction === 'vertical') { y1 += delta / 2; y2 -= delta / 2; }
-        else { x1 += delta / 2; x2 -= delta / 2; }
+        if (state.direction === 'vertical') { y1 += deltaPrev; y2 -= deltaNext; }
+        else { x1 += deltaPrev; x2 -= deltaNext; }
 
-        const draggingImg1 = ds.activeImageIndex === idx && ds.active;
-        if (draggingImg1) {
-          ctx.globalAlpha = 1.0; ctx.drawImage(img2.imgEl, x2, y2, img2.logicalW, img2.logicalH);
-          ctx.globalAlpha = 0.5; ctx.drawImage(img1.imgEl, x1, y1, img1.logicalW, img1.logicalH);
+        // 计算接缝基准线
+        let cx = 0, cy = 0;
+        if (state.direction === 'vertical') {
+          cy = img1.logicalY + img1.logicalH - state.overlaps[idx].prev;
         } else {
-          ctx.globalAlpha = 1.0; ctx.drawImage(img1.imgEl, x1, y1, img1.logicalW, img1.logicalH);
-          ctx.globalAlpha = (ds.activeImageIndex === idx + 1 && ds.active) ? 0.5 : 1.0;
-          ctx.drawImage(img2.imgEl, x2, y2, img2.logicalW, img2.logicalH);
+          cx = img1.logicalX + img1.logicalW - state.overlaps[idx].prev;
         }
-        ctx.globalAlpha = 1.0;
 
+        const isDragging = ds.active && ds.type === 'seam';
+
+        if (isDragging) {
+          const draggingImg1 = ds.activeImageIndex === idx;
+          if (draggingImg1) {
+            ctx.globalAlpha = 1.0; ctx.drawImage(img2.imgEl, x2, y2, img2.logicalW, img2.logicalH);
+            ctx.globalAlpha = 0.5; ctx.drawImage(img1.imgEl, x1, y1, img1.logicalW, img1.logicalH);
+          } else {
+            ctx.globalAlpha = 1.0; ctx.drawImage(img1.imgEl, x1, y1, img1.logicalW, img1.logicalH);
+            ctx.globalAlpha = 0.5; ctx.drawImage(img2.imgEl, x2, y2, img2.logicalW, img2.logicalH);
+          }
+          ctx.globalAlpha = 1.0;
+        } else {
+          // 绘制前一张图（严格限制在接缝线之前）
+          ctx.save();
+          ctx.beginPath();
+          if (state.direction === 'vertical') {
+            ctx.rect(-100000, -100000, 200000, cy + 100000);
+          } else {
+            ctx.rect(-100000, -100000, cx + 100000, 200000);
+          }
+          ctx.clip();
+          ctx.drawImage(img1.imgEl, x1, y1, img1.logicalW, img1.logicalH);
+          ctx.restore();
+
+          // 绘制后一张图（严格限制在接缝线之后）
+          ctx.save();
+          ctx.beginPath();
+          if (state.direction === 'vertical') {
+            ctx.rect(-100000, cy, 200000, 200000);
+          } else {
+            ctx.rect(cx, -100000, 200000, 200000);
+          }
+          ctx.clip();
+          ctx.drawImage(img2.imgEl, x2, y2, img2.logicalW, img2.logicalH);
+          ctx.restore();
+        }
+
+        // 绘制辅助虚线
         ctx.strokeStyle = '#10b981'; ctx.setLineDash([5 / state.camera.zoom, 5 / state.camera.zoom]);
         ctx.lineWidth = 1.5 / state.camera.zoom; ctx.beginPath();
         if (state.direction === 'vertical') {
-          const cy = img1.logicalY + img1.logicalH - state.overlaps[idx] / 2;
-          ctx.moveTo(-1000, cy); ctx.lineTo(state.baseDimension + 1000, cy);
+          ctx.moveTo(-100000, cy); ctx.lineTo(100000, cy);
         } else {
-          const cx = img1.logicalX + img1.logicalW - state.overlaps[idx] / 2;
-          ctx.moveTo(cx, -1000); ctx.lineTo(cx, state.baseDimension + 1000);
+          ctx.moveTo(cx, -100000); ctx.lineTo(cx, 100000);
         }
         ctx.stroke(); ctx.setLineDash([]);
       }
@@ -742,7 +790,9 @@
           active: true, startX: e.clientX, startY: e.clientY,
           startLogicalX: logical.x, startLogicalY: logical.y,
           startCamX: state.camera.x, startCamY: state.camera.y,
-          startCrop: { ...state.cropBox }
+          startCrop: { ...state.cropBox },
+          startTempPrev: state.tempOverlapDeltaPrev,
+          startTempNext: state.tempOverlapDeltaNext
         };
 
         if (this.isSpaceDown) { this.dragState.type = 'pan'; return; }
@@ -752,7 +802,7 @@
           for (let i = 0; i < state.overlaps.length; i++) {
             const img = state.images[i];
             let seamV = state.direction === 'vertical' ?
-              img.logicalY + img.logicalH - state.overlaps[i] / 2 : img.logicalX + img.logicalW - state.overlaps[i] / 2;
+              img.logicalY + img.logicalH - state.overlaps[i].prev : img.logicalX + img.logicalW - state.overlaps[i].prev;
             let hit = state.direction === 'vertical' ?
               (Math.abs(logical.y - seamV) < threshold && logical.x > 0 && logical.x < state.baseDimension) :
               (Math.abs(logical.x - seamV) < threshold && logical.y > 0 && logical.y < state.baseDimension);
@@ -764,7 +814,7 @@
         else if (state.mode === UI_MODE.STEP2_SEAM) {
           const img = state.images[state.activeSeamIndex];
           const seamVal = state.direction === 'vertical' ?
-            img.logicalY + img.logicalH - state.overlaps[state.activeSeamIndex] / 2 : img.logicalX + img.logicalW - state.overlaps[state.activeSeamIndex] / 2;
+            img.logicalY + img.logicalH - state.overlaps[state.activeSeamIndex].prev : img.logicalX + img.logicalW - state.overlaps[state.activeSeamIndex].prev;
           this.dragState.type = 'seam';
           const isFirst = state.direction === 'vertical' ? (logical.y < seamVal) : (logical.x < seamVal);
           this.dragState.activeImageIndex = isFirst ? state.activeSeamIndex : state.activeSeamIndex + 1;
@@ -793,7 +843,20 @@
         } else if (ds.type === 'seam') {
           const logical = this.screenToLogical(e.clientX, e.clientY);
           const deltaLogic = state.direction === 'vertical' ? logical.y - ds.startLogicalY : logical.x - ds.startLogicalX;
-          state.tempOverlapDelta = ds.activeImageIndex === state.activeSeamIndex ? deltaLogic * 2 : -deltaLogic * 2;
+
+          if (state.seamMode === 'symmetric') {
+            const amt = ds.activeImageIndex === state.activeSeamIndex ? deltaLogic : -deltaLogic;
+            state.tempOverlapDeltaPrev = ds.startTempPrev + amt;
+            state.tempOverlapDeltaNext = ds.startTempNext + amt;
+          } else {
+            if (ds.activeImageIndex === state.activeSeamIndex) {
+              state.tempOverlapDeltaPrev = ds.startTempPrev + deltaLogic;
+              state.tempOverlapDeltaNext = ds.startTempNext;
+            } else {
+              state.tempOverlapDeltaPrev = ds.startTempPrev;
+              state.tempOverlapDeltaNext = ds.startTempNext - deltaLogic;
+            }
+          }
         } else if (ds.type && ds.type.startsWith('crop_')) {
           const logical = this.screenToLogical(e.clientX, e.clientY);
           const dx = logical.x - ds.startLogicalX; const dy = logical.y - ds.startLogicalY;
@@ -890,7 +953,8 @@
 
       startSeamAdjust(index) {
         this.state.activeSeamIndex = index;
-        this.state.tempOverlapDelta = 0;
+        this.state.tempOverlapDeltaPrev = 0;
+        this.state.tempOverlapDeltaNext = 0;
         this.setUIMode(UI_MODE.STEP2_SEAM);
 
         const img1 = this.state.images[index];
@@ -900,11 +964,11 @@
 
         if (this.state.direction === 'vertical') {
           seamX = this.state.baseDimension / 2;
-          seamY = img1.logicalY + img1.logicalH - this.state.overlaps[index] / 2;
+          seamY = img1.logicalY + img1.logicalH - this.state.overlaps[index].prev;
           tZoom = Math.min(cw / this.state.baseDimension, ch / (img1.logicalH + img2.logicalH) * 2);
         } else {
           seamY = this.state.baseDimension / 2;
-          seamX = img1.logicalX + img1.logicalW - this.state.overlaps[index] / 2;
+          seamX = img1.logicalX + img1.logicalW - this.state.overlaps[index].prev;
           tZoom = Math.min(ch / this.state.baseDimension, cw / (img1.logicalW + img2.logicalW) * 2);
         }
         this.state.camera.x = seamX; this.state.camera.y = seamY; this.state.camera.zoom = tZoom;
@@ -934,10 +998,21 @@
         document.getElementById('btn-next-1').onclick = () => {
           this.state.direction = Array.from(document.getElementsByName('direction')).find(r => r.checked).value;
           this.state.calculateBaseLayout();
-          if (this.state.overlaps.length !== this.state.images.length - 1) this.state.overlaps = new Array(this.state.images.length - 1).fill(0);
+          if (this.state.overlaps.length !== this.state.images.length - 1) {
+            this.state.overlaps = Array.from({ length: this.state.images.length - 1 }, () => ({ prev: 0, next: 0 }));
+          }
           this.state.updateLayoutPositions(); this.fitCamera();
           this.setUIMode(UI_MODE.STEP2_GLOBAL);
         };
+
+        const seamModeToggle = document.getElementById('seam-mode-toggle');
+        const seamModeText = document.getElementById('seam-mode-text');
+        if (seamModeToggle) {
+          seamModeToggle.addEventListener('change', (e) => {
+            this.state.seamMode = e.target.checked ? 'symmetric' : 'independent';
+            seamModeText.textContent = e.target.checked ? '对称裁切' : '独立裁切';
+          });
+        }
 
         document.getElementById('btn-global-prev').onclick = () => this.setUIMode(UI_MODE.STEP1);
         document.getElementById('btn-global-next').onclick = () => {
@@ -947,12 +1022,15 @@
         };
 
         document.getElementById('btn-seam-cancel').onclick = () => {
-          this.state.tempOverlapDelta = 0;
+          this.state.tempOverlapDeltaPrev = 0;
+          this.state.tempOverlapDeltaNext = 0;
           this.state.updateLayoutPositions(); this.fitCamera(); this.setUIMode(UI_MODE.STEP2_GLOBAL);
         };
         document.getElementById('btn-seam-confirm').onclick = () => {
-          this.state.overlaps[this.state.activeSeamIndex] += this.state.tempOverlapDelta;
-          this.state.tempOverlapDelta = 0;
+          this.state.overlaps[this.state.activeSeamIndex].prev += this.state.tempOverlapDeltaPrev;
+          this.state.overlaps[this.state.activeSeamIndex].next += this.state.tempOverlapDeltaNext;
+          this.state.tempOverlapDeltaPrev = 0;
+          this.state.tempOverlapDeltaNext = 0;
           this.state.updateLayoutPositions(); this.fitCamera(); this.setUIMode(UI_MODE.STEP2_GLOBAL);
         };
 
