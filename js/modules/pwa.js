@@ -23,7 +23,7 @@ export class PWAModule {
 
     const COLOR_LIGHT = '#f9fafb';
     const COLOR_DARK = '#121212';
-
+    const bgColor = isDark ? COLOR_DARK : COLOR_LIGHT;
     const iconColor = isDark ? COLOR_LIGHT : COLOR_DARK;
 
     const svgCode = `
@@ -42,6 +42,7 @@ export class PWAModule {
             </g>
         </mask>
     </defs>
+    <rect width='512' height='512' fill='${bgColor}' />
     <rect width='512' height='512' fill='${iconColor}' mask='url(#icon-mask)' />
 </svg>`.trim().replace(/\n/g, '').replace(/"/g, "'");
 
@@ -53,8 +54,8 @@ export class PWAModule {
       description: this.app.i18n.t('desc'),
       start_url: mainUrl,
       display: "standalone",
-      background_color: isDark ? COLOR_DARK : COLOR_LIGHT,
-      theme_color: isDark ? COLOR_DARK : COLOR_LIGHT,
+      background_color: bgColor,
+      theme_color: bgColor,
       icons: [{
         src: iconDataUri,
         sizes: "any 512x512 192x192",
