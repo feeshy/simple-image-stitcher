@@ -34,6 +34,36 @@ export class LoaderModule {
     this.renderThumbnails();
   }
 
+  autoScrollLoop() {
+    if (!this.isAutoScrolling || this.scrollSpeedY === 0) {
+      this.isAutoScrolling = false;
+      return;
+    }
+
+    this.grid.scrollTop += this.scrollSpeedY;
+
+    if (this.touchClone && this.lastTouchX && this.lastTouchY) {
+      this.touchClone.style.visibility = 'hidden';
+      const elUnder = document.elementFromPoint(this.lastTouchX, this.lastTouchY);
+      this.touchClone.style.visibility = 'visible';
+
+      const targetContainer = elUnder ? elUnder.closest('.thumbnail-container') : null;
+
+      if (this.touchTargetDiv && this.touchTargetDiv !== targetContainer) {
+        this.touchTargetDiv.classList.remove('drag-over');
+      }
+
+      if (targetContainer && targetContainer !== this.touchDragDiv) {
+        targetContainer.classList.add('drag-over');
+        this.touchTargetDiv = targetContainer;
+      } else {
+        this.touchTargetDiv = null;
+      }
+    }
+
+    requestAnimationFrame(() => this.autoScrollLoop());
+  }
+
   renderThumbnails() {
     this.grid.innerHTML = '';
     const images = this.app.state.images;
@@ -85,6 +115,8 @@ export class LoaderModule {
 
       div.addEventListener('touchstart', e => {
         if (e.target.closest('.delete-btn')) return;
+        if (e.cancelable) e.preventDefault();
+
         const touch = e.touches[0];
         const rect = div.getBoundingClientRect();
         this.touchStartX = touch.clientX;
@@ -93,67 +125,90 @@ export class LoaderModule {
         this.touchOffsetY = touch.clientY - rect.top;
         this.touchDragDiv = div;
         this.touchDragIndex = index;
-        this.isTouchDragging = false;
+
+        this.isTouchDragging = true;
+        this.scrollSpeedY = 0;
+        this.isAutoScrolling = false;
 
         if (this.touchClone) {
           this.touchClone.remove();
           this.touchClone = null;
         }
-      }, { passive: true });
+
+        if (navigator.vibrate) navigator.vibrate(50);
+
+        this.touchClone = div.cloneNode(true);
+        const cloneRect = div.getBoundingClientRect();
+        this.touchClone.style.position = 'fixed';
+        this.touchClone.style.zIndex = '9999';
+        this.touchClone.style.pointerEvents = 'none';
+        this.touchClone.style.opacity = '0.9';
+        this.touchClone.style.transform = 'scale(1.05)';
+        this.touchClone.style.margin = '0';
+        this.touchClone.style.width = cloneRect.width + 'px';
+        this.touchClone.style.height = cloneRect.height + 'px';
+        this.touchClone.style.left = (this.touchStartX - this.touchOffsetX) + 'px';
+        this.touchClone.style.top = (this.touchStartY - this.touchOffsetY) + 'px';
+
+        const delBtn = this.touchClone.querySelector('.delete-btn');
+        if (delBtn) delBtn.style.display = 'none';
+
+        document.body.appendChild(this.touchClone);
+        div.style.opacity = '0.3';
+      }, { passive: false });
 
       div.addEventListener('touchmove', e => {
-        if (!this.touchDragDiv) return;
+        if (!this.touchDragDiv || !this.isTouchDragging) return;
+        if (e.cancelable) e.preventDefault();
+
         const touch = e.touches[0];
+        this.lastTouchX = touch.clientX;
+        this.lastTouchY = touch.clientY;
 
-        if (!this.isTouchDragging) {
-          if (Math.hypot(touch.clientX - this.touchStartX, touch.clientY - this.touchStartY) > 10) {
-            this.isTouchDragging = true;
+        this.touchClone.style.left = (touch.clientX - this.touchOffsetX) + 'px';
+        this.touchClone.style.top = (touch.clientY - this.touchOffsetY) + 'px';
 
-            this.touchClone = div.cloneNode(true);
-            const rect = div.getBoundingClientRect();
-            this.touchClone.style.position = 'fixed';
-            this.touchClone.style.zIndex = '9999';
-            this.touchClone.style.pointerEvents = 'none';
-            this.touchClone.style.opacity = '0.9';
-            this.touchClone.style.transform = 'scale(1.05)';
-            this.touchClone.style.margin = '0';
-            this.touchClone.style.width = rect.width + 'px';
-            this.touchClone.style.height = rect.height + 'px';
-            this.touchClone.style.left = (touch.clientX - this.touchOffsetX) + 'px';
-            this.touchClone.style.top = (touch.clientY - this.touchOffsetY) + 'px';
+        const gridRect = this.grid.getBoundingClientRect();
+        const edgeThreshold = 60;
+        this.scrollSpeedY = 0;
 
-            const delBtn = this.touchClone.querySelector('.delete-btn');
-            if (delBtn) delBtn.style.display = 'none';
-
-            document.body.appendChild(this.touchClone);
-            div.style.opacity = '0.3';
-          }
+        if (touch.clientY < gridRect.top + edgeThreshold) {
+          const dist = gridRect.top + edgeThreshold - touch.clientY;
+          this.scrollSpeedY = -Math.min(dist * 0.4, 25);
+        } else if (touch.clientY > gridRect.bottom - edgeThreshold) {
+          const dist = touch.clientY - (gridRect.bottom - edgeThreshold);
+          this.scrollSpeedY = Math.min(dist * 0.4, 25);
         }
 
-        if (this.isTouchDragging) {
-          if (e.cancelable) e.preventDefault();
+        if (this.scrollSpeedY !== 0 && !this.isAutoScrolling) {
+          this.isAutoScrolling = true;
+          this.autoScrollLoop();
+        }
 
-          this.touchClone.style.left = (touch.clientX - this.touchOffsetX) + 'px';
-          this.touchClone.style.top = (touch.clientY - this.touchOffsetY) + 'px';
+        this.touchClone.style.visibility = 'hidden';
+        const elUnder = document.elementFromPoint(touch.clientX, touch.clientY);
+        this.touchClone.style.visibility = 'visible';
 
-          const elUnder = document.elementFromPoint(touch.clientX, touch.clientY);
-          const targetContainer = elUnder ? elUnder.closest('.thumbnail-container') : null;
+        const targetContainer = elUnder ? elUnder.closest('.thumbnail-container') : null;
 
-          if (this.touchTargetDiv && this.touchTargetDiv !== targetContainer) {
-            this.touchTargetDiv.classList.remove('drag-over');
-          }
+        if (this.touchTargetDiv && this.touchTargetDiv !== targetContainer) {
+          this.touchTargetDiv.classList.remove('drag-over');
+        }
 
-          if (targetContainer && targetContainer !== this.touchDragDiv) {
-            targetContainer.classList.add('drag-over');
-            this.touchTargetDiv = targetContainer;
-          } else {
-            this.touchTargetDiv = null;
-          }
+        if (targetContainer && targetContainer !== this.touchDragDiv) {
+          targetContainer.classList.add('drag-over');
+          this.touchTargetDiv = targetContainer;
+        } else {
+          this.touchTargetDiv = null;
         }
       }, { passive: false });
 
       const endTouchDrag = () => {
+        this.scrollSpeedY = 0;
+        this.isAutoScrolling = false;
+
         if (!this.touchDragDiv) return;
+
         if (this.isTouchDragging) {
           if (this.touchClone) {
             this.touchClone.remove();
