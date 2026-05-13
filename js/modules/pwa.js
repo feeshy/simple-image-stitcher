@@ -30,9 +30,9 @@ export class PWAModule {
       background_color: isDark ? "#121212" : "#f9fafb",
       theme_color: isDark ? "#121212" : "#f9fafb",
       icons: [{
-        src: isDark ? "./icon-dark.png" : "./icon-light.png",
-        sizes: "512x512",
-        type: "image/png",
+        src: "./icon.svg",
+        sizes: "192x192 512x512",
+        type: "image/svg+xml",
         purpose: "any maskable"
       }]
     };
@@ -48,13 +48,12 @@ export class PWAModule {
     const mainUrl = location.href.split('?')[0].split('#')[0];
     if ('serviceWorker' in navigator) {
       const swCode = `
-          const CACHE_NAME = 'img-stitcher-v2';
+          const CACHE_NAME = 'img-stitcher-v3';
           const MAIN_URL = '${mainUrl}';
-          
+
           const ASSETS = [
               MAIN_URL,
-              './icon-light.png',
-              './icon-dark.png',
+              './icon.svg',
               './css/styles.css',
               './locales/i18n.json',
               './js/app.js',
