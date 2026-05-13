@@ -24,7 +24,7 @@
     "desc": "极简纯前端长图拼接应用，支持离线本地使用"
   },
   "en": {
-    "title": "Simple Image Stitcher",
+    "title": "Img Stitcher",
     "vertical": "Vertical",
     "horizontal": "Horizontal",
     "emptyTitle": "Click or drag images here",
@@ -45,6 +45,6 @@
     "tooLarge": "Image too large, auto-scaled to prevent crash.",
     "downloaded": "Downloaded",
     "delete": "Delete",
-    "desc": "Simple front-end long image stitcher, PWA offline ready."
+    "desc": "Simple PWA long image stitcher, no internet connection required"
   }
 }
