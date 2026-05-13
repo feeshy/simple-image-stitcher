@@ -90,6 +90,12 @@ class AppController {
       }
     });
     fileInput.addEventListener('change', e => this.loader.handleFiles(e.target.files));
+    window.addEventListener('paste', e => {
+      if (this.state.mode === UI_MODE.STEP1 && e.clipboardData && e.clipboardData.files.length > 0) {
+        e.preventDefault();
+        this.loader.handleFiles(e.clipboardData.files);
+      }
+    });
 
     document.getElementById('btn-clear-all').onclick = () => {
       this.state.images.forEach(img => URL.revokeObjectURL(img.url));
