@@ -75,7 +75,7 @@ export class PWAModule {
     const mainUrl = location.href.split('?')[0].split('#')[0];
     if ('serviceWorker' in navigator) {
       const swCode = `
-          const CACHE_NAME = 'v1.0';
+          const CACHE_NAME = 'v2.0';
           const MAIN_URL = '${mainUrl}';
 
           const ASSETS = [

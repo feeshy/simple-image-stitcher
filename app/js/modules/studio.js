@@ -240,7 +240,11 @@ export class StudioModule {
       this.pointers.delete(e.pointerId);
       this.canvas.releasePointerCapture(e.pointerId);
       if (this.pointers.size === 0) {
-        this.dragState.active = false; this.dragState.type = null;
+        if (this.dragState.active && this.dragState.type && this.dragState.type.startsWith('crop_')) {
+          this.app.centerCropBox();
+        }
+        this.dragState.active = false;
+        this.dragState.type = null;
       } else if (this.pointers.size === 1) {
         const pt = this.pointers.get(Array.from(this.pointers.keys())[0]);
         this.handleSingleDown({ clientX: pt.x, clientY: pt.y });
@@ -342,6 +346,8 @@ export class StudioModule {
       const logical = this.screenToLogical(e.clientX, e.clientY);
       const dx = logical.x - ds.startLogicalX; const dy = logical.y - ds.startLogicalY;
       let { x, y, w, h } = ds.startCrop;
+      
+      const bounds = state.totalBounds;
 
       if (ds.type.includes('n')) { y += dy; h -= dy; }
       if (ds.type.includes('s')) { h += dy; }
@@ -351,6 +357,15 @@ export class StudioModule {
       const minSize = 10 / state.camera.zoom;
       if (w < minSize) { w = minSize; x = state.cropBox.x; }
       if (h < minSize) { h = minSize; y = state.cropBox.y; }
+
+      if (x < 0) { w += x; x = 0; }
+      if (y < 0) { h += y; y = 0; }
+      if (x + w > bounds.w) { w = bounds.w - x; }
+      if (y + h > bounds.h) { h = bounds.h - y; }
+
+      w = Math.max(minSize, w);
+      h = Math.max(minSize, h);
+
       state.cropBox = { x, y, w, h };
     }
   }

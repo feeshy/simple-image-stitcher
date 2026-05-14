@@ -248,5 +248,10 @@ export class LoaderModule {
     this.btnNext.disabled = !canProceed;
     this.btnNext.classList.toggle('opacity-50', !canProceed);
     this.btnNext.classList.toggle('cursor-not-allowed', !canProceed);
+
+    const float1 = document.getElementById('ui-step1-floating');
+    if (float1) {
+      float1.classList.toggle('hidden', images.length === 0 || this.app.state.mode !== 'step1');
+    }
   }
 }

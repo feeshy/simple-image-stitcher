@@ -38,6 +38,7 @@ class AppController {
     document.getElementById('step-1').className = mode === UI_MODE.STEP1 ? 'step-container active-step p-4 sm:p-6 w-full h-full flex flex-col' : 'step-container hidden-step';
     document.getElementById('step-2-3').className = mode !== UI_MODE.STEP1 ? 'step-container active-step bg-gray-100 dark:bg-gray-950' : 'step-container hidden-step';
 
+    document.getElementById('ui-step1-floating').classList.toggle('hidden', mode !== UI_MODE.STEP1);
     document.getElementById('ui-step2-global').classList.toggle('hidden', mode !== UI_MODE.STEP2_GLOBAL);
     document.getElementById('ui-step2-seam').classList.toggle('hidden', mode !== UI_MODE.STEP2_SEAM);
     document.getElementById('ui-step3-crop').classList.toggle('hidden', mode !== UI_MODE.STEP3_CROP);
@@ -77,6 +78,23 @@ class AppController {
     this.state.camera.x = seamX; this.state.camera.y = seamY; this.state.camera.zoom = tZoom;
   }
 
+  centerCropBox() {
+    if (this.state.mode !== UI_MODE.STEP3_CROP) return;
+
+    const box = this.state.cropBox;
+    const centerX = box.x + box.w / 2;
+    const centerY = box.y + box.h / 2;
+
+    this.state.camera.x = centerX;
+    this.state.camera.y = centerY;
+
+    const canvas = this.studio.canvas;
+    const padding = 80;
+    const scaleX = (canvas.clientWidth - padding) / box.w;
+    const scaleY = (canvas.clientHeight - padding) / box.h;
+    this.state.camera.zoom = Math.min(2.0, Math.min(scaleX, scaleY));
+  }
+
   bindUIEvents() {
     const dropZone = document.getElementById('drop-zone');
     const fileInput = document.getElementById('file-input');
@@ -104,8 +122,16 @@ class AppController {
       fileInput.value = '';
     };
 
+    const dirToggle = document.getElementById('direction-toggle');
+    const dirText = document.getElementById('direction-text');
+    if (dirToggle) {
+      dirToggle.addEventListener('change', (e) => {
+        this.state.direction = e.target.checked ? 'horizontal' : 'vertical';
+        dirText.textContent = e.target.checked ? this.i18n.t('horizontal') : this.i18n.t('vertical');
+      });
+    }
+
     document.getElementById('btn-next-1').onclick = () => {
-      this.state.direction = Array.from(document.getElementsByName('direction')).find(r => r.checked).value;
       this.state.calculateBaseLayout();
       if (this.state.overlaps.length !== this.state.images.length - 1) {
         this.state.overlaps = Array.from({ length: this.state.images.length - 1 }, () => ({ prev: 0, next: 0 }));
