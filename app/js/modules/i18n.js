@@ -1,17 +1,61 @@
 export class I18nModule {
   constructor() {
     this.lang = navigator.language.startsWith('zh') ? 'zh' : 'en';
-    this.data = null;
+    this.data = {
+      "zh": {
+        "title": "简单拼图",
+        "vertical": "纵向拼接",
+        "horizontal": "横向拼接",
+        "emptyTitle": "添加图片以开始",
+        "emptySub": "拖动缩略图重新排序",
+        "clear": "清空",
+        "nextStep": "下一步",
+        "prevStep": "上一步",
+        "clickSeam": "点击高亮微调接缝",
+        "cancel": "取消",
+        "indepCrop": "独立裁切",
+        "symCrop": "对称裁切",
+        "done": "完成",
+        "export": "导出",
+        "restart": "首页",
+        "offline": "您已离线，应用可在离线模式下继续使用",
+        "online": "网络已恢复",
+        "generating": "正在生成...",
+        "tooLarge": "图片过大，已自动缩放以防崩溃",
+        "downloaded": "下载完成",
+        "delete": "删除",
+        "desc": "极简纯前端长图拼接应用，支持离线本地使用"
+      },
+      "en": {
+        "title": "Simple Image Stitcher",
+        "vertical": "Vertical",
+        "horizontal": "Horizontal",
+        "emptyTitle": "Import images to get started",
+        "emptySub": "Drag thumbnails to reorder",
+        "clear": "Clear",
+        "nextStep": "Next",
+        "prevStep": "Back",
+        "clickSeam": "Tap seam to tune",
+        "cancel": "Cancel",
+        "indepCrop": "Inde.",
+        "symCrop": "Symm.",
+        "done": "Done",
+        "export": "Export",
+        "restart": "Restart",
+        "offline": "You are offline. App continues to work.",
+        "online": "Network restored",
+        "generating": "Generating...",
+        "tooLarge": "Image too large, auto-scaled to prevent crash.",
+        "downloaded": "Downloaded",
+        "delete": "Delete",
+        "desc": "Simple front-end long image stitcher, PWA offline ready."
+      }
+    };
   }
 
   async init() {
-    try {
-      const response = await fetch('./locales/i18n.json');
-      this.data = await response.json();
-      this.updateDOM();
-    } catch (e) {
-      console.error('Failed to load i18n data', e);
-    }
+    this.updateDOM();
+    return Promise.resolve();
   }
 
   t(key) {
