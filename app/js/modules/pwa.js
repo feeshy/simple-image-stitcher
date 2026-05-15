@@ -26,6 +26,8 @@ export class PWAModule {
     const bgColor = isDark ? COLOR_DARK : COLOR_LIGHT;
     const iconColor = isDark ? COLOR_LIGHT : COLOR_DARK;
 
+    const iconUrl = new URL('./favicon.svg', location.href).href;
+
     const manifest = {
       name: this.app.i18n.t('title'),
       short_name: this.app.i18n.t('title'),
@@ -35,7 +37,7 @@ export class PWAModule {
       background_color: bgColor,
       theme_color: bgColor,
       icons: [{
-          src: "./favicon.svg",
+        src: iconUrl,
         sizes: "any 512x512 192x192",
         type: "image/svg+xml",
         purpose: "any maskable"
@@ -50,61 +52,10 @@ export class PWAModule {
   }
 
   initSW() {
-    const mainUrl = location.href.split('?')[0].split('#')[0];
-    if ('serviceWorker' in navigator) {
-      const swCode = `
-          const CACHE_NAME = 'v2.1';
-          const MAIN_URL = '${mainUrl}';
-
-          const ASSETS = [
-              MAIN_URL,
-              './css/styles.css',
-              './js/app.js',
-              './js/modules/state.js',
-              './js/modules/i18n.js',
-              './js/modules/pwa.js',
-              './js/modules/loader.js',
-              './js/modules/studio.js'
-          ];
-          
-          self.addEventListener('install', event => {
-              self.skipWaiting();
-              event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)));
-          });
-          
-          self.addEventListener('activate', event => {
-              event.waitUntil(
-                  caches.keys().then(keys => Promise.all(
-                      keys.map(key => {
-                          if (key !== CACHE_NAME) return caches.delete(key);
-                      })
-                  )).then(() => self.clients.claim())
-              );
-          });
-          
-          self.addEventListener('fetch', event => {
-              if (event.request.method !== 'GET' || !event.request.url.startsWith('http')) return;
-              event.respondWith(
-                  caches.match(event.request).then(cachedRes => {
-                      if (cachedRes) {
-                          fetch(event.request).then(netRes => {
-                              if (netRes && netRes.status === 200) caches.open(CACHE_NAME).then(cache => cache.put(event.request, netRes));
-                          }).catch(()=>{});
-                          return cachedRes;
-                      }
-                      return fetch(event.request).then(netRes => {
-                          if (netRes && netRes.status === 200) {
-                              const resClone = netRes.clone();
-                              caches.open(CACHE_NAME).then(cache => cache.put(event.request, resClone));
-                          }
-                          return netRes;
-                      }).catch(() => { if (event.request.mode === 'navigate') return caches.match(MAIN_URL); });
-                  })
-              );
-          });
-      `;
-      const swUrl = URL.createObjectURL(new Blob([swCode], { type: 'application/javascript' }));
-      navigator.serviceWorker.register(swUrl).catch(err => console.log('SW Error:', err));
+    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+      navigator.serviceWorker.register('./sw.js').catch(err => {
+        console.log('SW registration failed:', err);
+      });
     }
   }
 }
