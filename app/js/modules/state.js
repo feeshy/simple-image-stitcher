@@ -24,14 +24,14 @@ export class StateModule {
   calculateBaseLayout() {
     if (this.images.length === 0) return;
     if (this.direction === 'vertical') {
-      this.baseDimension = this.images[0].naturalW;
+      this.baseDimension = Math.min(...this.images.map(img => img.naturalW));
       this.images.forEach(img => {
         img.scale = this.baseDimension / img.naturalW;
         img.logicalW = this.baseDimension;
         img.logicalH = img.naturalH * img.scale;
       });
     } else {
-      this.baseDimension = this.images[0].naturalH;
+      this.baseDimension = Math.min(...this.images.map(img => img.naturalH));
       this.images.forEach(img => {
         img.scale = this.baseDimension / img.naturalH;
         img.logicalH = this.baseDimension;
