@@ -32,6 +32,7 @@ export class PWAModule {
       name: this.app.i18n.t('title'),
       short_name: this.app.i18n.t('title'),
       description: this.app.i18n.t('desc'),
+      scope: mainUrl,
       start_url: mainUrl,
       display: "standalone",
       background_color: bgColor,
