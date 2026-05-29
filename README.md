@@ -2,7 +2,7 @@
 
 **中文** | [En](#en)
 
-# [简单拼图](https://feeshy.github.io/simple-image-stitcher)
+# [简单拼图](https://stitcher.feeshy.top)
 
 极简长截图拼接工具，基于PWA，可离线运行
 
@@ -28,7 +28,7 @@
 
 [中文](#zh) | **En**
 
-# [Simple Image Stitcher](https://feeshy.github.io/simple-image-stitcher)
+# [Simple Image Stitcher](https://stitcher.feeshy.top)
 
 Simple PWA long image stitcher, no internet connection required.
 
