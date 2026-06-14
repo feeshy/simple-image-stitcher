@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8">
@@ -7,24 +7,16 @@
   <meta name="theme-color" content="#121212">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>简单拼图</title>
-  <meta name="keywords" content="长图拼接,台词拼接,拼图工具,图片拼接,长图生成,离线应用,PWA,Image Stitcher,Long Image,Photo Joiner">
+  <title>Simple Img Stitcher</title>
+  <meta name="keywords" content="Image Stitcher,Long Image,Photo Joiner,Image Stitching,PWA,Offline App">
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
   <link rel="stylesheet" href="./css/styles.css">
   <link rel="stylesheet" href="./css/tailwind.css">
-  <script>
-    (function(){
-      if (new URLSearchParams(location.search).has('zh')) return;
-      if (!navigator.language.startsWith('zh')) {
-        location.replace('./en');
-      }
-    })();
-  </script>
 </head>
 
 <body class="bg-gray-50 text-gray-900 dark:bg-[#121212] dark:text-white">
   <div id="step-1" class="step-container active-step p-4 sm:p-6 w-full h-full flex flex-col relative">
-    <a href="https://feeshy.top/" class="absolute top-4 left-4 text-sm text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white transition-colors z-20 flex items-center gap-1 flex">
+    <a href="https://feeshy.top/" target="_blank" class="absolute top-4 left-4 text-sm text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white transition-colors z-20 flex items-center gap-1 flex">
       <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 1024 1024">
         <circle r="512" cx="512" cy="512" mask="url(#mask)" />
         <mask id="mask">
@@ -39,25 +31,25 @@
         <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
       </svg>
     </a>
-    <a href="./en" class="absolute top-4 right-10 text-sm text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white transition-colors z-20 flex">
-      <svg fill="currentColor" class="w-5 h-5" alt="Switch to English Version by clicking here" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+    <a href="./?lang=zh" class="absolute top-4 right-10 text-sm text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white transition-colors z-20 flex">
+      <svg fill="currentColor" class="w-5 h-5" alt="点击切换到中文" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
         <path d="M478.33,433.6l-90-218a22,22,0,0,0-40.67,0l-90,218a22,22,0,1,0,40.67,16.79L316.66,406H419.33l18.33,44.39A22,22,0,0,0,458,464a22,22,0,0,0,20.32-30.4ZM334.83,362,368,281.65,401.17,362Z" />
         <path d="M267.84,342.92a22,22,0,0,0-4.89-30.7c-.2-.15-15-11.13-36.49-34.73,39.65-53.68,62.11-114.75,71.27-143.49H330a22,22,0,0,0,0-44H214V70a22,22,0,0,0-44,0V90H54a22,22,0,0,0,0,44H251.25c-9.52,26.95-27.05,69.5-53.79,108.36-31.41-41.68-43.08-68.65-43.17-68.87a22,22,0,0,0-40.58,17c.58,1.38,14.55,34.23,52.86,83.93.92,1.19,1.83,2.35,2.74,3.51-39.24,44.35-77.74,71.86-93.85,80.74a22,22,0,1,0,21.07,38.63c2.16-1.18,48.6-26.89,101.63-85.59,22.52,24.08,38,35.44,38.93,36.1a22,22,0,0,0,30.75-4.9Z" />
       </svg>
     </a>
     <div class="text-center mb-4 sm:mb-6 shrink-0">
-      <h1 class="text-3xl font-bold mb-2">
+      <h1 class="text-xl sm:text-2xl font-bold mb-2">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="height:1.5em; display:inline-block; vertical-align:middle; color-scheme: light dark;">
           <path fill="currentColor" d="M155.5,395.1C152.361,395.089 148.538,391.939 148.5,388.8C148.25,368 148,270.3 148,270.3L121.8,269.6C91.8,268.9 91.3,268.7 85.6,259.6C82.3,254.4 79.6,247 80.6,246.1C80.9,245.7 96.2,245.6 114.6,245.8L148,246.1C148,246.1 148.333,144.6 148.5,123C148.524,119.936 151.936,116.507 155,116.5C189.75,116.417 322.25,116.417 357,116.5C360.064,116.507 363.477,119.936 363.5,123C363.667,145.05 364,248.8 364,248.8L371.3,249.4C375.2,249.7 388.6,250.4 401,251.1C413.4,251.7 425.5,252.6 428,252.9L432.5,253.5L427,256.2C416.4,261.4 403.4,266.1 397,266.9C393.4,267.4 384.5,268.1 377.3,268.5L364,269.2C364,269.2 363.667,367.95 363.5,389C363.476,392.064 360.064,395.499 357,395.5C322.333,395.517 190.25,395.217 155.5,395.1ZM340,372L340,268.7L312.3,269.3C297,269.7 259.2,270 228.3,270L172,270L172,372L340,372ZM340,247L340,140L172,140L172,245.8L245.2,245.9C285.4,246 318.6,246.2 318.8,246.5C319.1,246.8 324,247 329.7,247L340,247Z" />
         </svg>
-        <span>简单拼图</span>
+        <span>Simple Img Stitcher</span>
       </h1>
     </div>
     <div id="drop-zone" class="w-full flex-grow bg-white dark:bg-gray-900 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-2xl flex flex-col relative overflow-hidden cursor-pointer">
       <input type="file" id="file-input" multiple accept="image/*" class="hidden">
       <div id="image-grid" class="w-full h-full overflow-y-auto p-4 sm:p-6 content-start grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 hidden z-10"></div>
       <div id="empty-state" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0">
-        <p class="text-gray-500 text-sm text-center">添加图片以开始<br>拖动缩略图重新排序</p>
+        <p class="text-gray-500 text-sm text-center">Import images here<br>Drag thumbnails to reorder</p>
       </div>
     </div>
   </div>
@@ -68,41 +60,41 @@
 
   <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[350px] ">
     <div id="ui-step1-floating" class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-6 py-3 rounded-full shadow-lg border border-gray-200/50 dark:border-gray-800/50 flex items-center justify-between hidden">
-      <button class="btn btn-secondary" id="btn-clear-all" disabled>清空</button>
+      <button class="btn btn-secondary" id="btn-clear-all" disabled>Clear</button>
       <label class="flex items-center gap-2 cursor-pointer group">
         <div class="relative flex items-center">
           <input type="checkbox" id="direction-toggle" class="sr-only peer">
           <div class="w-10 h-5 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-blue-500 transition-colors"></div>
           <div class="absolute left-0.5 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-5"></div>
         </div>
-        <span class="text-xs text-gray-700 dark:text-gray-300 select-none" id="direction-text">纵向拼接</span>
+        <span class="text-xs text-gray-700 dark:text-gray-300 select-none" id="direction-text">Vert.</span>
       </label>
-      <button class="btn btn-primary" id="btn-next-1" disabled>下一步</button>
+      <button class="btn btn-primary" id="btn-next-1" disabled>Next</button>
     </div>
 
     <div id="ui-step2-global" class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-6 py-3 rounded-full shadow-lg border border-gray-200/50 dark:border-gray-800/50 flex items-center justify-between hidden">
-      <button class="btn btn-secondary" id="btn-global-prev">上一步</button>
-      <span class="text-xs text-gray-500 dark:text-gray-300">点击高亮微调接缝</span>
-      <button class="btn btn-primary" id="btn-global-next">下一步</button>
+      <button class="btn btn-secondary" id="btn-global-prev">Back</button>
+      <span class="text-xs text-gray-500 dark:text-gray-300">Tap seam to tune</span>
+      <button class="btn btn-primary" id="btn-global-next">Next</button>
     </div>
 
     <div id="ui-step2-seam" class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-6 py-3 rounded-full shadow-lg border border-gray-200/50 dark:border-gray-800/50 flex items-center justify-between hidden">
-      <button class="btn btn-secondary" id="btn-seam-cancel">取消</button>
+      <button class="btn btn-secondary" id="btn-seam-cancel">Cancel</button>
       <label class="flex items-center gap-2 cursor-pointer group">
         <div class="relative flex items-center">
           <input type="checkbox" id="seam-mode-toggle" class="sr-only peer">
           <div class="w-10 h-5 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-blue-500 transition-colors"></div>
           <div class="absolute left-0.5 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-5"></div>
         </div>
-        <span class="text-xs text-gray-700 dark:text-gray-300" id="seam-mode-text">独立裁切</span>
+        <span class="text-xs text-gray-700 dark:text-gray-300" id="seam-mode-text">Indep.</span>
       </label>
-      <button class="btn btn-primary" id="btn-seam-confirm">完成</button>
+      <button class="btn btn-primary" id="btn-seam-confirm">Done</button>
     </div>
 
     <div id="ui-step3-crop" class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-6 py-3 rounded-full shadow-lg border border-gray-200/50 dark:border-gray-800/50 flex items-center justify-between hidden">
-      <button class="btn btn-secondary" id="btn-crop-prev">上一步</button>
-      <button class="btn btn-secondary" id="btn-crop-restart">首页</button>
-      <button class="btn btn-primary" id="btn-crop-save">导出</button>
+      <button class="btn btn-secondary" id="btn-crop-prev">Back</button>
+      <button class="btn btn-secondary" id="btn-crop-restart">Restart</button>
+      <button class="btn btn-primary" id="btn-crop-save">Export</button>
     </div>
   </div>
 
@@ -110,18 +102,18 @@
 
   <script>
     window.I18N_DATA = {
-      "vertical": "纵向拼接",
-      "horizontal": "横向拼接",
-      "symCrop": "对称裁切",
-      "indepCrop": "独立裁切",
-      "offline": "您已离线，应用可在离线模式下继续使用",
-      "online": "网络已恢复",
-      "generating": "正在生成...",
-      "tooLarge": "图片过大，已自动缩放以防崩溃",
-      "downloaded": "下载完成",
-      "delete": "删除",
-      "title": "简单拼图",
-      "desc": "极简纯前端长图拼接应用，支持离线本地使用"
+      "vertical": "Vert.",
+      "horizontal": "Horiz.",
+      "symCrop": "Symm.",
+      "indepCrop": "Indep.",
+      "offline": "You are offline. App continues to work.",
+      "online": "Network restored",
+      "generating": "Generating...",
+      "tooLarge": "Image too large, auto-scaled to prevent crash.",
+      "downloaded": "Downloaded",
+      "delete": "Delete",
+      "title": "Simple Img Stitcher",
+      "desc": "Simple front-end long image stitcher, PWA offline ready."
     };
   </script>
 

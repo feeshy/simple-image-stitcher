@@ -1,5 +1,4 @@
 import { UI_MODE, StateModule } from './modules/state.js';
-import { I18nModule } from './modules/i18n.js';
 import { PWAModule } from './modules/pwa.js';
 import { LoaderModule } from './modules/loader.js';
 import { StudioModule } from './modules/studio.js';
@@ -8,13 +7,11 @@ class AppController {
   constructor() { }
 
   async init() {
-    this.i18n = new I18nModule();
-    await this.i18n.init();
+    this.i18n = { t: (key) => window.I18N_DATA?.[key] || key };
 
     this.state = new StateModule();
     this.pwa = new PWAModule(this);
 
-    // 更新实例化的类名
     this.loader = new LoaderModule(this);
     this.studio = new StudioModule(this);
 
@@ -127,7 +124,7 @@ class AppController {
     if (dirToggle) {
       dirToggle.addEventListener('change', (e) => {
         this.state.direction = e.target.checked ? 'horizontal' : 'vertical';
-        dirText.textContent = e.target.checked ? this.i18n.t('horizontal') : this.i18n.t('vertical');
+        dirText.textContent = e.target.checked ? window.I18N_DATA.horizontal : window.I18N_DATA.vertical;
       });
     }
 
@@ -145,7 +142,7 @@ class AppController {
     if (seamModeToggle) {
       seamModeToggle.addEventListener('change', (e) => {
         this.state.seamMode = e.target.checked ? 'symmetric' : 'independent';
-        seamModeText.textContent = e.target.checked ? this.i18n.t('symCrop') : this.i18n.t('indepCrop');
+        seamModeText.textContent = e.target.checked ? window.I18N_DATA.symCrop : window.I18N_DATA.indepCrop;
       });
     }
 

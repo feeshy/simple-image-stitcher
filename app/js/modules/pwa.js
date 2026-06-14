@@ -29,10 +29,10 @@ export class PWAModule {
     const iconUrl = new URL('./favicon.svg', location.href).href;
 
     const manifest = {
-      name: this.app.i18n.t('title'),
-      short_name: this.app.i18n.t('title'),
-      description: this.app.i18n.t('desc'),
-      scope: mainUrl,
+      name: window.I18N_DATA?.title || 'Simple Img Stitcher',
+      short_name: window.I18N_DATA?.title || 'Simple Img Stitcher',
+      description: window.I18N_DATA?.desc || 'Simple front-end long image stitcher',
+      scope: '/',
       start_url: mainUrl,
       display: "standalone",
       background_color: bgColor,

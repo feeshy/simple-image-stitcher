@@ -28,7 +28,7 @@
 
 [中文](#zh) | **En**
 
-# [Simple Image Stitcher](https://stitcher.feeshy.top)
+# [Simple Img Stitcher](https://stitcher.feeshy.top)
 
 Simple PWA long image stitcher, no internet connection required.
 

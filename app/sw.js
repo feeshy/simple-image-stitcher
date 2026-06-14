@@ -1,16 +1,18 @@
 const VERSION = 'BUILD_TIME_PLACEHOLDER';
 const CACHE_NAME = 'site-cache-v' + VERSION;
 
-// 核心资产：包含你的模块化 JS 文件
 const ASSETS = [
   './',
+  './index.html',
+  './en.html',
   './css/styles.css',
+  './css/tailwind.css',
   './js/app.js',
   './js/modules/state.js',
-  './js/modules/i18n.js',
   './js/modules/pwa.js',
   './js/modules/loader.js',
-  './js/modules/studio.js'
+  './js/modules/studio.js',
+  './fonts/Inter.woff2'
 ];
 
 // 1. 安装阶段
