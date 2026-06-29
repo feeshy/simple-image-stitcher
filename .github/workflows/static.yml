@@ -35,6 +35,22 @@ jobs:
         run: |
           BUILD_TIME=$(date +'%Y%m%d%H%M%S')
           sed -i "s/BUILD_TIME_PLACEHOLDER/$BUILD_TIME/g" ./app/sw.js
+      - name: Generate Sitemap
+        run: |
+          BUILD_DATE=$(date -u +"%Y-%m-%d")
+          cat <<EOF > ./app/sitemap.xml
+          <?xml version="1.0" encoding="UTF-8"?>
+          <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+            <url>
+              <loc>https://stitcher.feeshy.top/</loc>
+              <lastmod>${BUILD_DATE}</lastmod>
+            </url>
+            <url>
+              <loc>https://stitcher.feeshy.top/en</loc>
+              <lastmod>${BUILD_DATE}</lastmod>
+            </url>
+          </urlset>
+          EOF
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
