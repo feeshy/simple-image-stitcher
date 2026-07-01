@@ -15,6 +15,13 @@ export class PWAModule {
     }
 
     this.initSW();
+
+    // Sync language preference on DOMContentLoaded or immediately if already loaded
+    if (document.readyState === 'loading') {
+      window.addEventListener('DOMContentLoaded', () => this.syncLanguage());
+    } else {
+      this.syncLanguage();
+    }
   }
 
   updateManifest() {
@@ -54,9 +61,41 @@ export class PWAModule {
 
   initSW() {
     if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-      navigator.serviceWorker.register('./sw.js').catch(err => {
+      navigator.serviceWorker.register('./sw.js').then(reg => {
+        // Sync language preference immediately upon successful registration
+        this.syncLanguage();
+
+        // Listen for controllerchange and sync again
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          this.syncLanguage();
+        });
+      }).catch(err => {
         console.log('SW registration failed:', err);
       });
+    }
+  }
+
+  syncLanguage(forcedLang) {
+    const currentLang = forcedLang || (document.documentElement.lang.startsWith('zh') ? 'zh' : 'en');
+    const messageData = { type: 'SET_LANG_PREF', lang: currentLang };
+
+    // Update client-side cookie
+    document.cookie = `lang_pref=${currentLang}; Path=/; Max-Age=31536000; Secure; SameSite=Lax`;
+
+    if ('serviceWorker' in navigator) {
+      // 1. Send to the active controlling Service Worker
+      if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage(messageData);
+      }
+
+      // 2. Send to all worker instances (active, installing, waiting) in all registrations
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        for (const reg of registrations) {
+          if (reg.active) reg.active.postMessage(messageData);
+          if (reg.installing) reg.installing.postMessage(messageData);
+          if (reg.waiting) reg.waiting.postMessage(messageData);
+        }
+      }).catch(() => {});
     }
   }
 }

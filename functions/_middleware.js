@@ -3,76 +3,58 @@ export async function onRequest(context) {
   const url = new URL(request.url);
   const pathname = url.pathname;
 
-  // 1. Bot check: identify search engine crawlers and bypass redirect/cookie logic
+  // 1. SW Bypass check: If sw-bypass=1 parameter is present, bypass all redirection
+  if (url.searchParams.get('sw-bypass') === '1') {
+    return context.next();
+  }
+
+  // 2. Bot check: search engine crawlers bypass redirection to guarantee indexing of all pages
   const userAgent = request.headers.get('user-agent') || '';
   const botRegex = /bot|spider|crawl|slurp|tracker|archiver|facebook|twitter|pinterest/i;
   const isBot = botRegex.test(userAgent);
-
   if (isBot) {
     return context.next();
   }
 
-  // Define paths that correspond to pages (excluding static files, assets, sitemaps, etc.)
-  const isDefaultLangPage = pathname === '/' || pathname === '/index.html';
-  const isEnLangPage = pathname === '/en' || pathname === '/en.html' || pathname.startsWith('/en/');
-  const isPage = isDefaultLangPage || isEnLangPage;
-
-  if (!isPage) {
-    return context.next();
-  }
-
-  // Helper to clone response and set cookie
-  const setCookie = (response, value) => {
-    const newHeaders = new Headers(response.headers);
-    newHeaders.set('Set-Cookie', `lang_pref=${value}; Path=/; Max-Age=31536000; Secure; SameSite=Lax`);
-    return new Response(response.body, {
-      status: response.status,
-      statusText: response.statusText,
-      headers: newHeaders
-    });
-  };
-
-  // 2. Manual language switcher check (?lang=...)
-  const langParam = url.searchParams.get('lang');
-  if (langParam) {
-    url.searchParams.delete('lang');
-    const redirectUrl = url.pathname + url.search;
-    const response = Response.redirect(new URL(redirectUrl, request.url).toString(), 302);
-    response.headers.set('Set-Cookie', `lang_pref=${langParam}; Path=/; Max-Age=31536000; Secure; SameSite=Lax`);
-    return response;
-  }
-
-  // Parse Cookie for preference
-  const cookieHeader = request.headers.get('Cookie') || '';
-  let langPref = null;
-  const cookies = cookieHeader.split(';');
-  for (const cookie of cookies) {
-    const [name, value] = cookie.trim().split('=');
-    if (name === 'lang_pref') {
-      langPref = value;
-      break;
+  // 3. One-way entry routing: ONLY redirect on the root path
+  const isRoot = pathname === '/' || pathname === '/index.html';
+  if (isRoot) {
+    // Parse Cookie for preference
+    const cookieHeader = request.headers.get('Cookie') || '';
+    let langPref = null;
+    const cookies = cookieHeader.split(';');
+    for (const cookie of cookies) {
+      const [name, value] = cookie.trim().split('=');
+      if (name === 'lang_pref') {
+        langPref = value;
+        break;
+      }
     }
-  }
 
-  // 3. Homepage language routing (for '/' or '/index.html')
-  if (isDefaultLangPage) {
     if (langPref) {
+      // If preference is English, redirect to /en
       if (langPref === 'en') {
         const redirectUrl = new URL('/en' + url.search, request.url);
         return Response.redirect(redirectUrl.toString(), 302);
       }
-      // If zh or other, let it pass
+      // If preference is zh (default), serve root directly without redirection
       return context.next();
     } else {
-      // If no cookie preference, check Accept-Language header (default to Chinese, redirect for any other language)
+      // First visit (no preference cookie): read Accept-Language header
       const acceptLang = request.headers.get('Accept-Language') || '';
       const firstLang = acceptLang.split(',')[0].trim().toLowerCase();
       if (firstLang.startsWith('zh')) {
-        // Only Chinese does not redirect (stay on / and set cookie)
+        // Stay on zh, serve root directly, and set the default preference cookie
         const response = await context.next();
-        return setCookie(response, 'zh');
+        const newHeaders = new Headers(response.headers);
+        newHeaders.set('Set-Cookie', 'lang_pref=zh; Path=/; Max-Age=31536000; Secure; SameSite=Lax');
+        return new Response(response.body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: newHeaders
+        });
       } else {
-        // Any other language redirects to English /en
+        // Any other language: redirect to English /en and set preference cookie
         const redirectUrl = new URL('/en' + url.search, request.url);
         const response = Response.redirect(redirectUrl.toString(), 302);
         response.headers.set('Set-Cookie', 'lang_pref=en; Path=/; Max-Age=31536000; Secure; SameSite=Lax');
@@ -81,15 +63,6 @@ export async function onRequest(context) {
     }
   }
 
-  // 4. Subpage language preference update (for English pages)
-  if (isEnLangPage) {
-    const response = await context.next();
-    // Quietly update preference to English if the user visits an English page directly
-    if (langPref !== 'en') {
-      return setCookie(response, 'en');
-    }
-    return response;
-  }
-
+  // All other specific subpaths (like /en) serve directly to respect specific URL visits
   return context.next();
 }
