@@ -44,6 +44,27 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   if (!event.request.url.startsWith(self.location.origin)) return;
 
+  const url = new URL(event.request.url);
+  const langParam = url.searchParams.get('lang');
+  if (langParam) {
+    url.searchParams.delete('lang');
+    const cleanUrl = url.toString();
+
+    // 1. Generate local 302 redirect response
+    const redirectResponse = Response.redirect(cleanUrl, 302);
+    const headers = new Headers(redirectResponse.headers);
+    headers.set('Set-Cookie', `lang_pref=${langParam}; Path=/; Max-Age=31536000; Secure; SameSite=Lax`);
+
+    const responseWithCookie = new Response(redirectResponse.body, {
+      status: redirectResponse.status,
+      statusText: redirectResponse.statusText,
+      headers: headers
+    });
+
+    event.respondWith(responseWithCookie);
+    return;
+  }
+
   event.respondWith(
     caches.open(CACHE_NAME).then(async (cache) => {
       // 1. 尝试从缓存获取
