@@ -64,18 +64,19 @@ export async function onRequest(context) {
       // If zh or other, let it pass
       return context.next();
     } else {
-      // If no cookie preference, check Accept-Language header
+      // If no cookie preference, check Accept-Language header (default to Chinese, redirect for any other language)
       const acceptLang = request.headers.get('Accept-Language') || '';
       const firstLang = acceptLang.split(',')[0].trim().toLowerCase();
-      if (firstLang.startsWith('en')) {
+      if (firstLang.startsWith('zh')) {
+        // Only Chinese does not redirect (stay on / and set cookie)
+        const response = await context.next();
+        return setCookie(response, 'zh');
+      } else {
+        // Any other language redirects to English /en
         const redirectUrl = new URL('/en' + url.search, request.url);
         const response = Response.redirect(redirectUrl.toString(), 302);
         response.headers.set('Set-Cookie', 'lang_pref=en; Path=/; Max-Age=31536000; Secure; SameSite=Lax');
         return response;
-      } else {
-        // Default to zh
-        const response = await context.next();
-        return setCookie(response, 'zh');
       }
     }
   }
