@@ -200,11 +200,10 @@ class AppController {
     };
     document.getElementById('btn-crop-restart').onclick = () => this.setUIMode(UI_MODE.STEP1);
 
-    // Sync language preference on language switcher link clicks
-    document.querySelectorAll('a[href*="lang="]').forEach(link => {
+    // Sync language preference on language switcher link clicks (using data-lang)
+    document.querySelectorAll('a[data-lang]').forEach(link => {
       link.addEventListener('click', () => {
-        const url = new URL(link.href, location.href);
-        const lang = url.searchParams.get('lang');
+        const lang = link.getAttribute('data-lang');
         if (lang && this.pwa) {
           this.pwa.syncLanguage(lang);
         }

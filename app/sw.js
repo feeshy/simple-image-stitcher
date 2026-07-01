@@ -52,8 +52,9 @@ self.addEventListener('install', (event) => {
           }
 
           return fetch(fetchUrl).then(async (response) => {
-            if (!response.ok) {
-              throw new Error(`Request failed for: ${url}`);
+            // Precache defense: strictly verify response is OK and NOT redirected
+            if (!response.ok || response.redirected) {
+              throw new Error(`Request failed or was redirected for URL: ${url}`);
             }
 
             // Extract blob to re-create the Response, removing redirected: true or opaqueredirect flags
@@ -74,7 +75,7 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// 2. Activate stage: clean up old caches (preserving the language preference cache)
+// 2. Activate stage: clean up old caches (preserving the 'lang-pref-cache' language preference cache)
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -126,7 +127,16 @@ self.addEventListener('fetch', (event) => {
         // Otherwise, serve default Chinese index.html
         const cache = await caches.open(CACHE_NAME);
         const cachedResponse = await cache.match('./index.html');
-        return cachedResponse || fetch(event.request);
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+
+        // Network fallback with redirect transformation defense
+        const networkResponse = await fetch(event.request);
+        if (networkResponse.redirected) {
+          return Response.redirect(networkResponse.url, 302);
+        }
+        return networkResponse;
       })());
       return;
     }
@@ -137,7 +147,16 @@ self.addEventListener('fetch', (event) => {
       event.respondWith((async () => {
         const cache = await caches.open(CACHE_NAME);
         const cachedResponse = await cache.match('./en.html');
-        return cachedResponse || fetch(event.request);
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+
+        // Network fallback with redirect transformation defense
+        const networkResponse = await fetch(event.request);
+        if (networkResponse.redirected) {
+          return Response.redirect(networkResponse.url, 302);
+        }
+        return networkResponse;
       })());
       return;
     }
@@ -149,10 +168,17 @@ self.addEventListener('fetch', (event) => {
       const cachedResponse = await cache.match(event.request);
 
       const fetchPromise = fetch(event.request).then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200) {
-          // STRICT REDIRECT CONTAMINATION DEFENSE:
-          // Only cache if the response is NOT redirected and not an opaque redirect
-          if (!networkResponse.redirected && networkResponse.type !== 'opaqueredirect') {
+        if (!networkResponse) return networkResponse;
+
+        // Redirect transformation defense: if network response is redirected,
+        // convert it to a standard, explicit redirect Response to prevent ERR_FAILED
+        if (networkResponse.redirected) {
+          return Response.redirect(networkResponse.url, 302);
+        }
+
+        if (networkResponse.status === 200) {
+          // Clean responses only: skip caching if response is an opaque redirect
+          if (networkResponse.type !== 'opaqueredirect') {
             cache.put(event.request, networkResponse.clone());
           }
         }
